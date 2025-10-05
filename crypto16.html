@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Crypto Price Tracker</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #0f172a, #1e1b4b);
+      color: white;
+    }
+    nav {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 15px 40px; border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    nav h1 { color: #a855f7; }
+    nav ul { display: flex; gap: 30px; list-style: none; }
+    nav ul li { cursor: pointer; color: #d1d5db; }
+    nav ul li:hover { color: white; }
+    nav .actions { display: flex; gap: 15px; }
+    nav select, nav button {
+      padding: 6px 12px; border-radius: 6px; border: none;
+    }
+    nav select { background: #1e1b4b; color: white; border: 1px solid gray; }
+    nav button { background: #a855f7; color: white; cursor: pointer; }
+    nav button:hover { background: #7e22ce; }
+
+    .hero { text-align: center; padding: 60px 20px 20px; }
+    .hero h2 { font-size: 36px; }
+    .hero p { color: #9ca3af; }
+    .search-box { margin-top: 20px; display: flex; justify-content: center; }
+    .search-box input {
+      padding: 12px; width: 300px; border-radius: 6px 0 0 6px;
+      border: none; outline: none; font-size: 16px;
+    }
+    .search-box button {
+      background: #8b55f7; color: white; border: none;
+      padding: 12px 20px; border-radius: 0 6px 6px 0; cursor: pointer;
+    }
+    .search-box button:hover { background: #7e22ce; }
+
+    table { width: 90%; margin: 40px auto; border-collapse: collapse; }
+    thead { background: #1e1b4b; color: #9ca3af; }
+    th, td { padding: 15px; text-align: left; }
+    tbody tr { border-bottom: 1px solid rgba(255,255,255,0.1); cursor: pointer; }
+    tbody tr:hover { background: rgba(255,255,255,0.05); }
+    .coin { display: flex; align-items: center; gap: 10px; }
+    .coin img { width: 24px; height: 24px; }
+    .green { color: #4ade80; }
+    .red { color: #f87171; }
+
+    /* Buy Button + Tooltip */
+    .buy-btn {
+      background: #22c55e;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      position: relative;
+    }
+    .buy-btn .tooltip {
+      visibility: hidden;
+      opacity: 0;
+      background: #111;
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 6px;
+      position: absolute;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      transition: opacity 0.3s;
+    }
+    .buy-btn:hover .tooltip {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    /* Popup */
+    .modal {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7); justify-content: center; align-items: center;
+    }
+    .modal-content {
+      background: #1e1b4b; padding: 20px; border-radius: 10px; width: 650px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4); color: white;
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; }
+    .close { cursor: pointer; font-size: 20px; }
+    canvas { margin-top: 20px; background: #0f172a; border-radius: 8px; }
+    .high-low { margin-top: 15px; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <nav>
+    <h1>Cryptoplace</h1>
+    <ul>
+      <li>Home</li><li>Features</li><li>Pricing</li><li>Blog</li>
+    </ul>
+    <div class="actions">
+      <select id="currency">
+        <option value="USDT">USDT</option>
+        <option value="BUSD">BUSD</option>
+      </select>
+      <button>Sign Up</button>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <h2>Largest Crypto Marketplace</h2>
+    <p>Welcome to the world's largest cryptocurrency marketplace. <br>
+       Sign up to explore more about cryptos.</p>
+    <div class="search-box">
+      <input type="text" id="search" placeholder="Search crypto...">
+      <button onclick="loadCoins()">Search</button>
+    </div>
+  </section>
+
+  <table>
+    <thead>
+      <tr>
+        <th>#</th><th>Coins</th><th>Price</th><th>24h Change</th><th>Volume</th><th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="coin-table"></tbody>
+  </table>
+
+  <!-- Modal Popup -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-title">Crypto Details</h3>
+        <span class="close" onclick="closeModal()">&times;</span>
+      </div>
+      <canvas id="priceChart" height="250"></canvas>
+      <div class="high-low" id="highLow"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "https://api.binance.com/api/v3";
+    const tableBody = document.getElementById("coin-table");
+    const searchInput = document.getElementById("search");
+    const currencySelect = document.getElementById("currency");
+    let chart;
+
+    // Coin info with logos
+    const coinInfo = {
+      "BTC": { name: "Bitcoin", image: "https://cryptoicons.org/api/icon/btc/200" },
+      "ETH": { name: "Ethereum", image: "https://cryptoicons.org/api/icon/eth/200" },
+      "BNB": { name: "BNB", image: "https://cryptoicons.org/api/icon/bnb/200" },
+      "XRP": { name: "XRP", image: "https://cryptoicons.org/api/icon/xrp/200" },
+      "ADA": { name: "Cardano", image: "https://cryptoicons.org/api/icon/ada/200" },
+      "DOGE": { name: "Dogecoin", image: "https://cryptoicons.org/api/icon/doge/200" }
+    };
+
+    async function loadCoins() {
+      const currency = currencySelect.value;
+      const res = await fetch(`${API_URL}/ticker/24hr`);
+      const coins = await res.json();
+
+      const filtered = coins.filter(c => c.symbol.endsWith(currency));
+      const searchText = searchInput.value.toLowerCase();
+
+      const searched = filtered.filter(c => {
+        const base = c.symbol.replace(currency, "");
+        return (coinInfo[base]?.name.toLowerCase().includes(searchText) || base.toLowerCase().includes(searchText));
+      });
+
+      tableBody.innerHTML = "";
+      searched.slice(0, 20).forEach((coin, i) => {
+        const base = coin.symbol.replace(currency, "");
+        const info = {
+          name: coinInfo[base]?.name || base,
+          image: coinInfo[base]?.image || `https://cryptoicons.org/api/icon/${base.toLowerCase()}/200`
+        };
+
+        let row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${i+1}</td>
+          <td class="coin"><img src="${info.image}" alt="${base}"> ${info.name} - ${base}</td>
+          <td>${parseFloat(coin.lastPrice).toLocaleString()} ${currency}</td>
+          <td class="${coin.priceChangePercent>=0?'green':'red'}">${parseFloat(coin.priceChangePercent).toFixed(2)}%</td>
+          <td>${parseFloat(coin.quoteVolume).toLocaleString()} ${currency}</td>
+          <td>
+            <button class="buy-btn">
+              Buy
+              <span class="tooltip">Buy on PancakeSwap v3 (BSC)</span>
+            </button>
+          </td>
+        `;
+
+        // open chart modal when row is clicked
+        row.onclick = () => openModal(base, currency);
+
+        // stop row click when Buy button is clicked
+        row.querySelector(".buy-btn").addEventListener("click", (e) => {
+          e.stopPropagation();
+          alert(`Buying ${base} on PancakeSwap...`);
+        });
+
+        tableBody.appendChild(row);
+      });
+    }
+
+    async function openModal(symbol, currency) {
+      document.getElementById("modal-title").textContent = symbol + " (24h)";
+      document.getElementById("modal").style.display = "flex";
+      
+      const res = await fetch(`${API_URL}/klines?symbol=${symbol}${currency}&interval=1h&limit=24`);
+      const data = await res.json();
+      const prices = data.map(p => ({
+        time: new Date(p[0]).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+        value: parseFloat(p[4])
+      }));
+      const high = Math.max(...prices.map(p => p.value));
+      const low = Math.min(...prices.map(p => p.value));
+      document.getElementById("highLow").textContent =
+        `24h High: ${high.toLocaleString()} ${currency} | 24h Low: ${low.toLocaleString()} ${currency}`;
+      const ctx = document.getElementById("priceChart").getContext("2d");
+      if (chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: prices.map(p => p.time),
+          datasets: [{
+            label: symbol + " Price",
+            data: prices.map(p => p.value),
+            borderColor: "#facc15",
+            backgroundColor: "rgba(250,204,21,0.2)",
+            fill: true,
+            tension: 0.3,
+            pointRadius: 4,
+            pointHoverRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          interaction: {
+            mode: "index",
+            intersect: false
+          },
+          plugins: {
+            tooltip: {
+              enabled: true,
+              callbacks: {
+                label: (context) => `Price: ${context.raw} ${currency}`
+              }
+            },
+            legend: { labels: { color: "white" } }
+          },
+          scales: {
+            x: {
+              ticks: { color: "white" },
+              grid: { color: "rgba(255,255,255,0.1)" }
+            },
+            y: {
+              ticks: { color: "white" },
+              grid: { color: "rgba(255,255,255,0.1)" }
+            }
+          }
+        }
+      });
+    }
+
+    function closeModal() {
+      document.getElementById("modal").style.display = "none";
+    }
+
+    // initial load
+    loadCoins();
+    setInterval(loadCoins, 60000);
+  </script>
+</body>
+</html>
