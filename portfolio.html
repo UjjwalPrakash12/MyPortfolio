@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Portfolio</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      display: flex;
+      min-height: 100vh;
+      color: #E0E0E0;
+      background: #0B0F1D;
+    }
+
+    .sidebar {
+      width: 22%;
+      height: 100vh;
+      background: #111827;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border-right: 2px solid #1F2937;
+      position: fixed;
+      left: 0;
+      top: 0;
+      font-size: 1.3rem;
+    }
+
+    .sidebar h2 {
+      color: #FF6B35;
+      margin-bottom: 40px;
+      font-size: 2.2rem;
+    }
+
+    .sidebar a {
+      text-decoration: none;
+      color: #CFCFCF;
+      margin: 20px 0;
+      transition: 0.3s;
+      cursor: pointer;
+      font-size: 1.4rem;
+    }
+
+    .sidebar a:hover {
+      color: #FF6B35;
+      transform: translateX(5px);
+    }
+
+    .main {
+      margin-left: 22%;
+      width: 78%;
+      padding: 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 80px;
+    }
+
+    section {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .intro {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .intro-text {
+      max-width: 55%;
+    }
+
+    .intro-text h1 {
+      font-size: 2.8rem;
+      color: #FF6B35;
+      margin-bottom: 10px;
+    }
+
+    .intro-text h3 {
+      font-size: 1.4rem;
+      color: #00D4FF;
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+
+    .intro-text p {
+      color: #CFCFCF;
+      line-height: 1.6;
+    }
+
+    .intro img {
+  width: 320px;
+  height: 600px;
+  border-radius: 55% / 45%;
+  border: 5px solid #FF6B35;
+  object-fit: cover;
+  box-shadow: 0 0 30px rgba(255, 107, 53, 0.6);
+}
+
+    .about {
+      flex-direction: row;
+      gap: 40px;
+    }
+
+    .about-text {
+      width: 60%;
+    }
+
+    .about-text h2 {
+      color: #00D4FF;
+      margin-bottom: 20px;
+    }
+
+    .about-text p {
+      color: #CFCFCF;
+      line-height: 1.6;
+    }
+
+    .about-side {
+      width: 35%;
+      background: #1E293B;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(255,107,53,0.2);
+    }
+
+    .about-side h3 {
+      color: #FF6B35;
+      margin-bottom: 15px;
+    }
+
+    .about-side p {
+      color: #CFCFCF;
+      margin-bottom: 10px;
+    }
+
+    .skills h2,
+    .education h2,
+    .projects h2,
+    .contact h2 {
+      color: #FF6B35;
+      margin-bottom: 20px;
+    }
+
+    .skills-list,
+    .education-list,
+    .project-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .skills-list li,
+    .edu-item,
+    .project {
+      background: #1E293B;
+      color: #E0E0E0;
+      padding: 12px 18px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-decoration: none;
+      font-size: 1.1rem;
+      transition: 0.3s;
+    }
+
+    .skills-list li:hover,
+    .edu-item:hover,
+    .project:hover {
+      border-color: #00D4FF;
+      color: #00D4FF;
+      transform: translateY(-2px);
+    }
+
+    .project .arrow {
+      font-size: 1.1rem;
+      opacity: 0.7;
+      transition: 0.3s;
+    }
+
+    .project:hover .arrow {
+      transform: translateX(6px);
+      opacity: 1;
+    }
+
+    .contact {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .contact-links a {
+      text-decoration: none;
+      color: #E0E0E0;
+      margin: 5px 0;
+      font-size: 1.3rem;
+      transition: 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .contact-links a.linkedin:hover span {
+      color: #0077B5;
+    }
+
+    .contact-links a.github:hover span {
+      color: #000;
+    }
+
+    .contact-links img {
+      width: 25px;
+      height: 25px;
+    }
+
+    .contact-links p {
+      color: #CFCFCF;
+      margin: 5px 0;
+      font-size: 1.2rem;
+    }
+
+    footer {
+      text-align: center;
+      color: #999;
+      font-size: 0.9rem;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 900px) {
+      body {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        justify-content: center;
+        position: relative;
+        border-right: none;
+        border-bottom: 2px solid #1F2937;
+      }
+      .main {
+        margin-left: 0;
+        width: 100%;
+        padding: 40px 20px;
+      }
+      .intro {
+        flex-direction: column;
+        text-align: center;
+      }
+      .intro-text {
+        max-width: 100%;
+      }
+      .intro img {
+        margin-top: 20px;
+      }
+      .about {
+        flex-direction: column;
+      }
+      .about-text,
+      .about-side {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <h2>Portfolio</h2>
+    <a href="#intro">Home</a>
+    <a href="#about">About</a>
+    <a href="#skills">Skills</a>
+    <a href="#education">Education</a>
+    <a href="#projects">Projects</a>
+
+    <br>
+
+     <section class="contact" id="contact">
+      <h2>Connect with Me</h2>
+      <div class="contact-links">
+        <a href="https://www.linkedin.com/in/ujjwal-prakash-6593b837b/" target="_blank" class="linkedin">
+          <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/linkedin.svg" alt="LinkedIn"> <span>LinkedIn</span>
+        </a>
+        <a href="https://github.com/UjjwalPrakash12" target="_blank" class="github">
+          <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/github.svg" alt="GitHub"> <span>GitHub</span>
+        </a>
+        <p>Email: ujjwalprakash1812@gmail.com</p>
+      </div>
+      <footer> Ujjwal Prakash | All Rights Reserved</footer>
+    </section>
+  </div>
+  </div>
+
+  <div class="main">
+    <section class="intro" id="intro">
+      <div class="intro-text">
+        <h1>Hi, I’m Ujjwal Prakash</h1>
+        <h3>Tech Enthusiast | Developer | Learner</h3>
+        <p>I’m a passionate student exploring the world of technology — from web development to data science. I love solving problems, building projects, and continuously learning new skills.</p>
+      </div>
+      <img src="https://classical-green-fijrrwbnlw.edgeone.app/1000130014-Picsart-AiImageEnhancer.jpg" alt="Ujjwal Prakash">
+    </section>
+
+    <section class="about" id="about">
+      <div class="about-text">
+        <h2>About Me</h2>
+        <p>I’m currently pursuing my studies in Computer Science. I enjoy creating meaningful projects that combine creativity and logic. My interests include full-stack development, AI & ML, and Game Development. I like playing outdoor sports like cricket and badminton.</p>
+      </div>
+      <div class="about-side">
+        <h3>Quick Info</h3>
+        <p><strong>College:</strong> Scaler School of Technology | BITS Pilani</p>
+        <p><strong>Year:</strong> 1st Year</p>
+        <p><strong>City:</strong> Bangalore</p>
+      </div>
+    </section>
+
+    <section class="skills" id="skills">
+      <h2>Skills</h2>
+      <ul class="skills-list">
+        <li>HTML</li>
+        <li>CSS</li>
+        <li>Java</li>
+        <li>Python</li>
+        <li>Javascript</li>
+        <li>Git & GitHub</li>
+      </ul>
+    </section>
+
+    <section class="education" id="education">
+      <h2>Education</h2>
+      <div class="education-list">
+        <div class="edu-item"><p><strong>Computer Science</strong> - Scaler School of Technology | BITS Pilani 1st Year</p></div>
+        <div class="edu-item"><p><strong>High School</strong> - Sree Ayyappa Public School, Bokaro</p></div>
+      </div>
+    </section>
+
+    <section class="projects" id="projects">
+      <h2>Projects</h2>
+      <div class="project-list">
+        <a class="project" href="http://127.0.0.1:5500/weekend_plans.html" target="_blank">Weekend Plans <span class="arrow">→</span></a>
+        <a class="project" href="http://127.0.0.1:5500/table.html" target="_blank">Table <span class="arrow">→</span></a>
+        <a class="project" href="http://127.0.0.1:5500/mywebpage.html" target="_blank">My Webpage <span class="arrow">→</span></a>
+        <a class="project" href="http://127.0.0.1:5500/moviecollectionyable.html" target="_blank">Movie Collection <span class="arrow">→</span></a>
+        <a class="project" href="http://127.0.0.1:5500/list.html" target="_blank">List <span class="arrow">→</span></a>
+        <a class="project" href="http://127.0.0.1:5500/class%204/recipe.html" target="_blank">Recipe <span class="arrow">→</span></a>
+        <a class="project" href="http://127.0.0.1:5500/class%206/semantic.html" target="_blank">Semantic Webpage <span class="arrow">→</span></a>
+        <a class="project" href="http://127.0.0.1:5500/form2.html" target="_blank">Forms <span class="arrow">→</span></a>
+        <a class="project" href="#" target="_blank">Dog Gallery <span class="arrow">→</span></a>
+        <a class="project" href="http://127.0.0.1:5500/moonorbit.html" target="_blank">Moon Orbit <span class="arrow">→</span></a>
+        <a class="project" href="http://127.0.0.1:5500/ferriswheel.html" target="_blank">Ferris Wheel <span class="arrow">→</span></a>
+        <a class="project" href="http://127.0.0.1:5500/crypto16.html" target="_blank">Live Crypto Tracker <span class="arrow">→</span></a>
+      </div>
+      </div>
+    </section>
+</body>
+</html>
